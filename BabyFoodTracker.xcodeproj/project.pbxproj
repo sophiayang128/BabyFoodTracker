@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXContainerItemProxy section */
@@ -30,21 +30,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		E5A4ABD12E15A52A00C81A68 /* BabyFoodTracker */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = BabyFoodTracker;
-			sourceTree = "<group>";
-		};
-		E5A4ABE02E15A52B00C81A68 /* BabyFoodTrackerTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = BabyFoodTrackerTests;
-			sourceTree = "<group>";
-		};
-		E5A4ABEA2E15A52B00C81A68 /* BabyFoodTrackerUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = BabyFoodTrackerUITests;
-			sourceTree = "<group>";
-		};
+		E5A4ABD12E15A52A00C81A68 /* BabyFoodTracker */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = BabyFoodTracker; sourceTree = "<group>"; };
+		E5A4ABE02E15A52B00C81A68 /* BabyFoodTrackerTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = BabyFoodTrackerTests; sourceTree = "<group>"; };
+		E5A4ABEA2E15A52B00C81A68 /* BabyFoodTrackerUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = BabyFoodTrackerUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -187,6 +175,7 @@
 				};
 			};
 			buildConfigurationList = E5A4ABCA2E15A52900C81A68 /* Build configuration list for PBXProject "BabyFoodTracker" */;
+			compatibilityVersion = "Xcode 15.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -195,7 +184,6 @@
 			);
 			mainGroup = E5A4ABC62E15A52900C81A68;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = E5A4ABD02E15A52A00C81A68 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -391,6 +379,7 @@
 				CODE_SIGN_ENTITLEMENTS = BabyFoodTracker/BabyFoodTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7YYHACLKF6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -428,6 +417,7 @@
 				CODE_SIGN_ENTITLEMENTS = BabyFoodTracker/BabyFoodTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7YYHACLKF6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;

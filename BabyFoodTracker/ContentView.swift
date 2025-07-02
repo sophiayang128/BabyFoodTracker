@@ -29,18 +29,25 @@ struct ContentView: View {
                 }
 
             // Third Tab: Food Recommendations
-            RecommendationsView()
+            RecommendationsView(foodStore: foodStore)
                 .tabItem {
                     Label("Recommendations", systemImage: "lightbulb.fill")
                 }
         }
         // Set overall UI style to be simple and cute
         .accentColor(.pink) // Accent color for cute icons and selected items
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.pink.opacity(0.1), Color.purple.opacity(0.1)]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(foodStore: FoodDataStore())
+        ContentView()
     }
 }

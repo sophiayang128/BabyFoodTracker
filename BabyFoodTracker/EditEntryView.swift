@@ -1,11 +1,11 @@
 //
-//  AddEntryView.swift
+//  EditEntryView.swift
 //  BabyFoodTracker
 //
 //  Created by Sophia Tang on 7/2/25.
 //
 
-// This file defines the view for adding new food entries.
+// This file defines the view for editing existing food entries.
 
 import SwiftUI
 import PhotosUI
@@ -13,22 +13,40 @@ import PhotosUI
 import UIKit
 #endif
 
-struct AddEntryView: View {
-    @ObservedObject var foodStore: FoodDataStore // Receives data store object
+struct EditEntryView: View {
+    @ObservedObject var foodStore: FoodDataStore
     @StateObject private var foodLibrary = FoodLibrary()
+    @Environment(\.dismiss) private var dismiss
     
-    @State private var selectedDate: Date = Date()
-    @State private var foodName: String = ""
-    @State private var selectedCategory: FoodCategory = .other
-    @State private var amount: Double = 0.0
-    @State private var selectedUnit: AmountUnit = .grams
-    @State private var notes: String = ""
+    let entry: BabyFoodEntry
+    
+    @State private var selectedDate: Date
+    @State private var foodName: String
+    @State private var selectedCategory: FoodCategory
+    @State private var amount: Double
+    @State private var selectedUnit: AmountUnit
+    @State private var notes: String
     @State private var showPhotoPicker: Bool = false
-    @State private var selectedPhotoItem: PhotosPickerItem? // For PhotosPicker
-    @State private var photoImageData: Data? // Stores selected photo data
+    @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var photoImageData: Data?
     @State private var showFoodLibrary: Bool = false
-    @State private var isFromLibrary: Bool = false
+    @State private var isFromLibrary: Bool
     @State private var selectedLibraryItem: FoodLibraryItem?
+
+    init(foodStore: FoodDataStore, entry: BabyFoodEntry) {
+        self.foodStore = foodStore
+        self.entry = entry
+        
+        // Initialize state with current entry values
+        _selectedDate = State(initialValue: entry.date)
+        _foodName = State(initialValue: entry.foodName)
+        _selectedCategory = State(initialValue: entry.foodCategory)
+        _amount = State(initialValue: entry.amount)
+        _selectedUnit = State(initialValue: entry.amountUnit)
+        _notes = State(initialValue: entry.notes ?? "")
+        _photoImageData = State(initialValue: entry.photoData)
+        _isFromLibrary = State(initialValue: entry.isFromLibrary)
+    }
 
     var body: some View {
         NavigationView {
@@ -36,17 +54,17 @@ struct AddEntryView: View {
                 VStack(spacing: 20) {
                     // Header with cute styling
                     VStack(spacing: 8) {
-                        Image(systemName: "heart.fill")
+                        Image(systemName: "pencil.circle.fill")
                             .font(.system(size: 40))
-                            .foregroundColor(.pink)
+                            .foregroundColor(.orange)
                             .padding(.bottom, 5)
                         
-                        Text("Add Food Entry")
+                        Text("Edit Food Entry")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.primary)
                         
-                        Text("Track your baby's food journey! 🍼")
+                        Text("Update your baby's food record! ✏️")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -298,10 +316,11 @@ struct AddEntryView: View {
                                 .shadow(color: .green.opacity(0.2), radius: 10, x: 0, y: 5)
                         )
                         
-                        // Add Entry Button
+                        // Update Entry Button
                         Button(action: {
                             if !foodName.isEmpty {
-                                let newEntry = BabyFoodEntry(
+                                let updatedEntry = BabyFoodEntry(
+                                    id: entry.id, // Keep the same ID
                                     date: selectedDate,
                                     foodName: foodName,
                                     foodCategory: selectedCategory,
@@ -311,15 +330,14 @@ struct AddEntryView: View {
                                     photoData: photoImageData,
                                     notes: notes.isEmpty ? nil : notes
                                 )
-                                foodStore.addEntry(newEntry)
-                                // Reset form
-                                resetForm()
+                                foodStore.updateEntry(updatedEntry)
+                                dismiss()
                             }
                         }) {
                             HStack {
-                                Image(systemName: "plus.circle.fill")
+                                Image(systemName: "checkmark.circle.fill")
                                     .font(.title2)
-                                Text("Add Entry")
+                                Text("Update Entry")
                                     .font(.title3)
                                     .fontWeight(.bold)
                             }
@@ -329,12 +347,12 @@ struct AddEntryView: View {
                                 RoundedRectangle(cornerRadius: 25)
                                     .fill(
                                         LinearGradient(
-                                            gradient: Gradient(colors: [Color.pink, Color.purple]),
+                                            gradient: Gradient(colors: [Color.orange, Color.red]),
                                             startPoint: .leading,
                                             endPoint: .trailing
                                         )
                                     )
-                                    .shadow(color: .pink.opacity(0.4), radius: 15, x: 0, y: 8)
+                                    .shadow(color: .orange.opacity(0.4), radius: 15, x: 0, y: 8)
                             )
                             .foregroundColor(.white)
                         }
@@ -346,7 +364,7 @@ struct AddEntryView: View {
             }
             .background(
                 LinearGradient(
-                    gradient: Gradient(colors: [Color.pink.opacity(0.05), Color.purple.opacity(0.05)]),
+                    gradient: Gradient(colors: [Color.orange.opacity(0.05), Color.red.opacity(0.05)]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -357,123 +375,19 @@ struct AddEntryView: View {
             }
         }
     }
-    
-    private func resetForm() {
-        foodName = ""
-        selectedCategory = .other
-        amount = 0.0
-        selectedUnit = .grams
-        notes = ""
-        selectedDate = Date()
-        photoImageData = nil
-        selectedPhotoItem = nil
-        isFromLibrary = false
-        selectedLibraryItem = nil
-    }
 }
 
-struct FoodLibraryView: View {
-    @ObservedObject var foodLibrary: FoodLibrary
-    @Binding var selectedItem: FoodLibraryItem?
-    @Environment(\.dismiss) private var dismiss
-    @State private var searchText = ""
-    @State private var selectedAgeRange = "6-8 months"
-    
-    private let ageRanges = ["6-8 months", "8-10 months", "10-12 months"]
-    
-    var filteredFoods: [FoodLibraryItem] {
-        let ageFiltered = foodLibrary.getFoodsForAge(selectedAgeRange)
-        if searchText.isEmpty {
-            return ageFiltered
-        } else {
-            return ageFiltered.filter { 
-                $0.name.lowercased().contains(searchText.lowercased()) ||
-                $0.description.lowercased().contains(searchText.lowercased())
-            }
-        }
-    }
-    
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Search and filter
-                VStack(spacing: 15) {
-                    TextField("Search foods...", text: $searchText)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                    
-                    Picker("Age Range", selection: $selectedAgeRange) {
-                        ForEach(ageRanges, id: \.self) { range in
-                            Text(range).tag(range)
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .padding(.horizontal)
-                }
-                .padding(.vertical)
-                .background(Color.gray.opacity(0.1))
-                
-                // Food list
-                List(filteredFoods) { item in
-                    FoodLibraryItemRow(item: item) {
-                        selectedItem = item
-                        dismiss()
-                    }
-                }
-            }
-            .navigationTitle("Food Library")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
-
-struct FoodLibraryItemRow: View {
-    let item: FoodLibraryItem
-    let onSelect: () -> Void
-    
-    var body: some View {
-        Button(action: onSelect) {
-            HStack(spacing: 15) {
-                Text(item.category.icon)
-                    .font(.title2)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(item.name)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                    
-                    Text(item.description)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                    
-                    if let nutritionalInfo = item.nutritionalInfo {
-                        Text(nutritionalInfo)
-                            .font(.caption)
-                            .foregroundColor(.blue)
-                    }
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
-            }
-            .padding(.vertical, 8)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
-
-struct AddEntryView_Previews: PreviewProvider {
+struct EditEntryView_Previews: PreviewProvider {
     static var previews: some View {
-        AddEntryView(foodStore: FoodDataStore())
+        let sampleEntry = BabyFoodEntry(
+            date: Date(),
+            foodName: "Apple Puree",
+            foodCategory: .fruits,
+            amount: 30.0,
+            amountUnit: .grams,
+            isFromLibrary: true,
+            notes: "Baby loved it!"
+        )
+        EditEntryView(foodStore: FoodDataStore(), entry: sampleEntry)
     }
-}
+} 
