@@ -397,88 +397,102 @@ struct FoodEntryCard: View {
     let onEdit: () -> Void
     
     var body: some View {
-        HStack(spacing: 15) {
-            // Photo or placeholder
-            if let photoData = entry.photoData, let uiImage = UIImage(data: photoData) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 60, height: 60)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.pink.opacity(0.3), lineWidth: 2)
-                    )
-            } else {
-                VStack {
-                    Text(entry.foodCategory.icon)
-                        .font(.title2)
-                    Text(entry.foodCategory.rawValue)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: 12) {
+            // Top row: Food name and action buttons
+            HStack(alignment: .top, spacing: 12) {
+                // Food name and category
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(entry.foodCategory.icon)
+                            .font(.title3)
+                        
+                        Text(entry.foodName)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                        
+                        if entry.isFromLibrary {
+                            Image(systemName: "book.fill")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                        }
+                        
+                        Spacer()
+                    }
+                    
+                    // Time and amount info
+                    HStack {
+                        Image(systemName: "clock")
+                            .font(.caption2)
+                            .foregroundColor(.pink)
+                        Text(entry.date, style: .time)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        if entry.amount > 0 {
+                            Text("•")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(String(format: "%.1f", entry.amount)) \(entry.amountUnit.rawValue)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                    }
                 }
-                .frame(width: 60, height: 60)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.gray.opacity(0.1))
-                )
+                
+                // Action buttons
+                HStack(spacing: 8) {
+                    Button(action: onEdit) {
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.title3)
+                            .foregroundColor(.blue.opacity(0.8))
+                    }
+                    
+                    Button(action: onDelete) {
+                        Image(systemName: "trash.circle.fill")
+                            .font(.title3)
+                            .foregroundColor(.red.opacity(0.8))
+                    }
+                }
             }
             
-            // Entry details
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Text(entry.foodName)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                    
-                    if entry.isFromLibrary {
-                        Image(systemName: "book.fill")
-                            .font(.caption)
-                            .foregroundColor(.blue)
+            // Bottom row: Photo and notes
+            HStack(alignment: .top, spacing: 12) {
+                // Photo or placeholder
+                if let photoData = entry.photoData, let uiImage = UIImage(data: photoData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 50, height: 50)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.pink.opacity(0.3), lineWidth: 1)
+                        )
+                } else {
+                    VStack {
+                        Text(entry.foodCategory.icon)
+                            .font(.title3)
                     }
-                    
-                    Spacer()
+                    .frame(width: 50, height: 50)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.gray.opacity(0.1))
+                    )
                 }
                 
-                HStack {
-                    Image(systemName: "clock")
-                        .font(.caption)
-                        .foregroundColor(.pink)
-                    Text(entry.date, style: .time)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
-                    if entry.amount > 0 {
-                        Text("•")
-                            .foregroundColor(.secondary)
-                        Text("\(String(format: "%.1f", entry.amount)) \(entry.amountUnit.rawValue)")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
+                // Notes
                 if let notes = entry.notes, !notes.isEmpty {
                     Text(notes)
                         .font(.caption)
                         .foregroundColor(.secondary)
-                        .lineLimit(2)
-                }
-            }
-            
-            Spacer()
-            
-            HStack(spacing: 12) {
-                Button(action: onEdit) {
-                    Image(systemName: "pencil.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.blue.opacity(0.8))
-                }
-                
-                Button(action: onDelete) {
-                    Image(systemName: "trash.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.red.opacity(0.8))
+                        .lineLimit(3)
+                        .multilineTextAlignment(.leading)
+                    
+                    Spacer()
                 }
             }
         }

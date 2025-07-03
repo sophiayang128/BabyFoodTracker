@@ -27,7 +27,7 @@ struct BabyFoodEntry: Identifiable, Codable {
          foodName: String, 
          foodCategory: FoodCategory = .other,
          amount: Double = 0.0,
-         amountUnit: AmountUnit = .grams,
+         amountUnit: AmountUnit = .ounces,
          isFromLibrary: Bool = false,
          photoData: Data? = nil,
          notes: String? = nil) {
@@ -77,6 +77,7 @@ enum FoodCategory: String, CaseIterable, Codable {
 
 // Units for food amount measurement
 enum AmountUnit: String, CaseIterable, Codable {
+    case ounces = "oz"
     case grams = "g"
     case milliliters = "ml"
     case tablespoons = "tbsp"
@@ -86,6 +87,7 @@ enum AmountUnit: String, CaseIterable, Codable {
     
     var displayName: String {
         switch self {
+        case .ounces: return "ounces"
         case .grams: return "grams"
         case .milliliters: return "ml"
         case .tablespoons: return "tablespoons"

@@ -21,7 +21,7 @@ struct AddEntryView: View {
     @State private var foodName: String = ""
     @State private var selectedCategory: FoodCategory = .other
     @State private var amount: Double = 0.0
-    @State private var selectedUnit: AmountUnit = .grams
+    @State private var selectedUnit: AmountUnit = .ounces
     @State private var notes: String = ""
     @State private var showPhotoPicker: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem? // For PhotosPicker
@@ -133,21 +133,32 @@ struct AddEntryView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                 
-                                Picker("Category", selection: $selectedCategory) {
+                                Menu {
                                     ForEach(FoodCategory.allCases, id: \.self) { category in
-                                        HStack {
-                                            Text(category.icon)
-                                            Text(category.rawValue)
+                                        Button(action: {
+                                            selectedCategory = category
+                                        }) {
+                                            Text("\(category.icon) \(category.rawValue)")
                                         }
-                                        .tag(category)
                                     }
+                                } label: {
+                                    HStack {
+                                        Text(selectedCategory.icon)
+                                            .font(.title3)
+                                        Text(selectedCategory.rawValue)
+                                            .font(.subheadline)
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.down")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding()
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .fill(Color.gray.opacity(0.1))
+                                    )
                                 }
-                                .pickerStyle(MenuPickerStyle())
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(Color.gray.opacity(0.1))
-                                )
                             }
                         }
                         .padding()
@@ -355,6 +366,9 @@ struct AddEntryView: View {
             .sheet(isPresented: $showFoodLibrary) {
                 FoodLibraryView(foodLibrary: foodLibrary, selectedItem: $selectedLibraryItem)
             }
+            .onTapGesture {
+                hideKeyboard()
+            }
         }
     }
     
@@ -362,13 +376,17 @@ struct AddEntryView: View {
         foodName = ""
         selectedCategory = .other
         amount = 0.0
-        selectedUnit = .grams
+        selectedUnit = .ounces
         notes = ""
         selectedDate = Date()
         photoImageData = nil
         selectedPhotoItem = nil
         isFromLibrary = false
         selectedLibraryItem = nil
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
