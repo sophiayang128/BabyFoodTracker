@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allows you to select photos from your library to include in your baby&apos;s food entries.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Allows you to take photos of your baby&apos;s food to include in the feeding log.</string>
+</dict>
+</plist>

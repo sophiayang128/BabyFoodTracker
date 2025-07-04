@@ -33,6 +33,12 @@ struct ContentView: View {
                 .tabItem {
                     Label("Recommendations", systemImage: "lightbulb.fill")
                 }
+
+            // Fourth Tab: DatePicker Test (for debugging)
+            DatePickerTestView()
+                .tabItem {
+                    Label("DatePicker Test", systemImage: "calendar.badge.clock")
+                }
         }
         // Set overall UI style to be simple and cute
         .accentColor(.pink) // Accent color for cute icons and selected items

@@ -12,6 +12,7 @@ import PhotosUI
 #if canImport(UIKit)
 import UIKit
 #endif
+import AVFoundation
 
 struct AddEntryView: View {
     @ObservedObject var foodStore: FoodDataStore // Receives data store object
@@ -29,6 +30,7 @@ struct AddEntryView: View {
     @State private var showFoodLibrary: Bool = false
     @State private var isFromLibrary: Bool = false
     @State private var selectedLibraryItem: FoodLibraryItem?
+    @State private var showCamera: Bool = false
 
     var body: some View {
         NavigationView {
@@ -37,14 +39,22 @@ struct AddEntryView: View {
                     headerView
                     mainContentView
                 }
+                .background(
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            hideKeyboard()
+                        }
+                )
             }
             .background(backgroundGradient)
             .navigationBarHidden(true)
             .sheet(isPresented: $showFoodLibrary) {
                 FoodLibraryView(foodLibrary: foodLibrary, selectedItem: $selectedLibraryItem)
             }
-            .onTapGesture {
-                hideKeyboard()
+
+            .sheet(isPresented: $showCamera) {
+                CameraView(photoImageData: $photoImageData)
             }
         }
     }
@@ -91,15 +101,12 @@ struct AddEntryView: View {
                     .foregroundColor(.primary)
             }
 
-            let minDate = Calendar.current.date(byAdding: .year, value: -100, to: Date())!
-            let maxDate = Calendar.current.date(byAdding: .year, value: 100, to: Date())!
-            
             DatePicker("Date and Time", selection: $selectedDate, in: minDate...maxDate, displayedComponents: [.date, .hourAndMinute])
                 .datePickerStyle(.graphical)
                 .environment(\.locale, Locale(identifier: "en_US"))
-                .onChange(of: selectedDate) { oldDate, newDate in
-                    print("📅 DatePicker changed - Old: \(dateFormatter.string(from: oldDate)) -> New: \(dateFormatter.string(from: newDate))")
-                }
+                // .onChange(of: selectedDate) { oldDate, newDate in
+                //     print("📅 DatePicker changed - Old: \(dateFormatter.string(from: oldDate)) -> New: \(dateFormatter.string(from: newDate))")
+                // }
                 .background(
                     RoundedRectangle(cornerRadius: 15)
                         .fill(Color.pink.opacity(0.1))
@@ -328,24 +335,68 @@ struct AddEntryView: View {
                     )
                 }
                 
-                PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                    HStack {
-                        Image(systemName: photoImageData != nil ? "arrow.clockwise" : "camera.fill")
-                        Text(photoImageData != nil ? "Change Photo" : "Take Photo")
-                            .fontWeight(.medium)
+                // Photo selection buttons
+                VStack(spacing: 10) {
+                    HStack(spacing: 10) {
+                        // Camera button
+                        Button(action: {
+                            showCamera = true
+                        }) {
+                            HStack {
+                                Image(systemName: "camera.fill")
+                                Text("Camera")
+                                    .fontWeight(.medium)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(Color.blue.gradient)
+                            )
+                            .foregroundColor(.white)
+                        }
+                        
+                        // Photo Library button
+                        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                            HStack {
+                                Image(systemName: "photo.on.rectangle")
+                                Text("Library")
+                                    .fontWeight(.medium)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(Color.green.gradient)
+                            )
+                            .foregroundColor(.white)
+                        }
+                        .onChange(of: selectedPhotoItem) { newItem in
+                            Task {
+                                if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                                    photoImageData = data
+                                }
+                            }
+                        }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 15)
-                            .fill(Color.green.gradient)
-                    )
-                    .foregroundColor(.white)
-                }
-                .onChange(of: selectedPhotoItem) { newItem in
-                    Task {
-                        if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                            photoImageData = data
+                    
+                    if photoImageData != nil {
+                        Button(action: {
+                            photoImageData = nil
+                            selectedPhotoItem = nil
+                        }) {
+                            HStack {
+                                Image(systemName: "trash")
+                                Text("Remove Photo")
+                                    .fontWeight(.medium)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(Color.red.gradient)
+                            )
+                            .foregroundColor(.white)
                         }
                     }
                 }
@@ -416,6 +467,15 @@ struct AddEntryView: View {
         formatter.dateStyle = .long
         formatter.timeStyle = .short
         return formatter
+    }
+    
+    // Computed properties for date range
+    private var minDate: Date {
+        Calendar.current.date(byAdding: .year, value: -100, to: Date())!
+    }
+    
+    private var maxDate: Date {
+        Calendar.current.date(byAdding: .year, value: 100, to: Date())!
     }
     
     private func resetForm() {

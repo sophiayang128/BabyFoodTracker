@@ -12,6 +12,7 @@ import PhotosUI
 #if canImport(UIKit)
 import UIKit
 #endif
+import AVFoundation
 
 struct EditEntryView: View {
     @ObservedObject var foodStore: FoodDataStore
@@ -32,6 +33,7 @@ struct EditEntryView: View {
     @State private var showFoodLibrary: Bool = false
     @State private var isFromLibrary: Bool
     @State private var selectedLibraryItem: FoodLibraryItem?
+    @State private var showCamera: Bool = false
 
     init(foodStore: FoodDataStore, entry: BabyFoodEntry) {
         self.foodStore = foodStore
@@ -60,6 +62,9 @@ struct EditEntryView: View {
             .navigationBarHidden(true)
             .sheet(isPresented: $showFoodLibrary) {
                 FoodLibraryView(foodLibrary: foodLibrary, selectedItem: $selectedLibraryItem)
+            }
+            .sheet(isPresented: $showCamera) {
+                CameraView(photoImageData: $photoImageData)
             }
         }
     }
@@ -109,14 +114,20 @@ struct EditEntryView: View {
             DatePicker("Date and Time", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
                 .datePickerStyle(.graphical)
                 .environment(\.locale, Locale(identifier: "en_US"))
-                .onChange(of: selectedDate) { oldDate, newDate in
-                    print("📅 EditEntryView DatePicker changed - Old: \(dateFormatter.string(from: oldDate)) -> New: \(dateFormatter.string(from: newDate))")
-                }
+                // .onChange(of: selectedDate) { oldDate, newDate in
+                //     print("📅 EditEntryView DatePicker changed - Old: \(dateFormatter.string(from: oldDate)) -> New: \(dateFormatter.string(from: newDate))")
+                // }
                 .background(
                     RoundedRectangle(cornerRadius: 15)
                         .fill(Color.pink.opacity(0.1))
                 )
                 .padding(.horizontal, 5)
+            
+            // Display the selected date to confirm binding is working
+            Text("Selected Date: \(selectedDate, formatter: dateFormatter)")
+                .font(.caption)
+                .foregroundColor(.gray)
+                .padding(.bottom, 5)
         }
         .padding()
         .background(
@@ -324,24 +335,68 @@ struct EditEntryView: View {
                     )
                 }
                 
-                PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                    HStack {
-                        Image(systemName: photoImageData != nil ? "arrow.clockwise" : "camera.fill")
-                        Text(photoImageData != nil ? "Change Photo" : "Take Photo")
-                            .fontWeight(.medium)
+                // Photo selection buttons
+                VStack(spacing: 10) {
+                    HStack(spacing: 10) {
+                        // Camera button
+                        Button(action: {
+                            showCamera = true
+                        }) {
+                            HStack {
+                                Image(systemName: "camera.fill")
+                                Text("Camera")
+                                    .fontWeight(.medium)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(Color.blue.gradient)
+                            )
+                            .foregroundColor(.white)
+                        }
+                        
+                        // Photo Library button
+                        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                            HStack {
+                                Image(systemName: "photo.on.rectangle")
+                                Text("Library")
+                                    .fontWeight(.medium)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(Color.green.gradient)
+                            )
+                            .foregroundColor(.white)
+                        }
+                        .onChange(of: selectedPhotoItem) { newItem in
+                            Task {
+                                if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                                    photoImageData = data
+                                }
+                            }
+                        }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 15)
-                            .fill(Color.green.gradient)
-                    )
-                    .foregroundColor(.white)
-                }
-                .onChange(of: selectedPhotoItem) { newItem in
-                    Task {
-                        if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                            photoImageData = data
+                    
+                    if photoImageData != nil {
+                        Button(action: {
+                            photoImageData = nil
+                            selectedPhotoItem = nil
+                        }) {
+                            HStack {
+                                Image(systemName: "trash")
+                                Text("Remove Photo")
+                                    .fontWeight(.medium)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(Color.red.gradient)
+                            )
+                            .foregroundColor(.white)
                         }
                     }
                 }
